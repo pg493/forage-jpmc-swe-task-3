@@ -148,7 +148,13 @@ def generate_csv():
         for t, stock, side, order, size in orders(market()):
             if t > MARKET_OPEN + SIM_LENGTH:
                 break
-            writer.writerow([t, stock, side, order, size])
+            writer.writerow([
+                str(t).erncode(), 
+                stock.encode(), 
+                side.encode(), 
+                order.encode(), 
+                size.encode()
+            ])
 
 def read_csv():
     """ Read a CSV or order history into a list. """
@@ -236,12 +242,18 @@ class App(object):
     """ The trading game server application. """
 
     def __init__(self):
-        self._book_1    = dict()
-        self._book_2    = dict()
-        self._data_1    = order_book(read_csv(), self._book_1, 'ABC')
-        self._data_2    = order_book(read_csv(), self._book_2, 'DEF')
-        self._rt_start = datetime.now()
-        self._sim_start, _, _  = next(self._data_1)
+        self._book_1 = dict()
+        self._book_2 = dict()
+        self._data_1 = order_book(read_csv(), self._book_1, 'ABC')
+        self._data_2 = order_book(read_csv(), self._book_2, 'DEF')
+        try:
+            self._rt_start = datetime.now()
+        except StopIteration:
+            print("Error: No more data in self._data_1")
+        try:
+            self._sim_start, _, _  = next(self._data_1)
+        except StopIteration:
+            print("error: No more data in self._data_2")
         self.read_10_first_lines()
 
     @property
